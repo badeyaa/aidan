@@ -11,6 +11,10 @@ first_line = True # DO NOT REMOVE
 # global variables or other functions can go here
 stances = ["Rock", "Paper", "Scissors"]
 
+path = [10, 9, 8, 14, 19, 23, 24, 23, 19, 20]
+idx = 0
+waited = False
+
 def get_winning_stance(stance):
     if stance == "Rock":
         return "Paper"
@@ -33,16 +37,15 @@ for line in fileinput.input():
 
     me = game.get_self()
 
-    if me.location == me.destination: # check if we have moved this turn
-        # get all living monsters closest to me
-        monsters = game.nearest_monsters(me.location, 1)
-
-        # choose a monster to move to at random
-        monster_to_move_to = monsters[random.randint(0, len(monsters)-1)]
-
-        # get the set of shortest paths to that monster
-        paths = game.shortest_paths(me.location, monster_to_move_to.location)
-        destination_node = paths[random.randint(0, len(paths)-1)][0]
+    if me.location == me.destination and idx < len(path): # check if we have moved this turn
+        if me.location == 8:
+            destination_node = 9
+            idx += 1
+        else:
+            destination_node = path[idx]
+            idx += 1
+    elif me.location == 8 and destination_node == 9:
+        destination_node = 14
     else:
         destination_node = me.destination
 
@@ -52,6 +55,10 @@ for line in fileinput.input():
     else:
         # otherwise, pick a random stance
         chosen_stance = stances[random.randint(0, 2)]
+    if me.movement_counter == me.speed + 1:
+        if game.has_monster(destination_node):
+            monster = game.get_monster(destination_node)
+            chosen_stance = get_winning_stance(monster.stance)
 
     # submit your decision for the turn (This function should be called exactly once per turn)
     game.submit_decision(destination_node, chosen_stance)
